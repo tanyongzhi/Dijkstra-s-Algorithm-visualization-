@@ -11,3 +11,9 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
 }
+
+.usermenu{
+  position: relative;
+  left: 30px;
+  border: 3px solid #73AD21;
+}
