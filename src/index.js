@@ -6,10 +6,12 @@ import Graph from "react-graph-vis";
 import React from "react";
 import ReactDOM from 'react-dom';
 import './index.css'
-import {dijkstra, toAdjacencyList, getRandomColor} from './helper.js'
-import { render } from "react-dom";
-import { connect } from "tls";
-import PriorityQueue from "priorityqueue";
+import Tabs from './tabs.js'
+import {toAdjacencyList, getRandomColor, arr_to_string} from './helper.js'
+import {dijkstra} from "./dijkstra.js"
+import {color_codes} from "./constants.js"
+
+var globl_id = 1;
 
 class Menu extends React.Component{
     constructor(props){
@@ -39,12 +41,6 @@ class Menu extends React.Component{
         }
         this.setState({weights: oldWeights});
     }
-    // handleStart(event){
-    //     this.setState({start: event.target.value});
-    // }
-    // handleEnd(event){
-    //     this.setState({end: event.target.value});
-    // }
     render(){
         return(
         <div className = "usermenu">
@@ -74,8 +70,8 @@ class Menu extends React.Component{
                 </button>
             </div>
             <p>
-            {this.props.distance}<br></br>
-            {this.props.path}
+            Total Distance: {this.props.distance}<br></br>
+            Path: {arr_to_string(this.props.path)}
             </p>
         </div>
         )
@@ -87,14 +83,13 @@ class Screen extends React.Component{
         this.state = {
             graph:{
                 nodes: [
-                    { id: 1, label: "Node 1", color: "#e04141" },
-                    { id: 2, label: "Node 2", color: "#e09c41" },
-                    { id: 3, label: "Node 3", color: "#e0df41" },
-                    { id: 4, label: "Node 4", color: "#7be041" },
-                    { id: 5, label: "Node 5", color: "#41e0c9" },
-                    { id: 6, label: "Node 6", color: "#23a20e" },
-                    { id: 7, label: "Node 7", color: "#ff1122" }
-
+                    { id: 1, label: "Node 1", color: color_codes.white, value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 2, label: "Node 2", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 3, label: "Node 3", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 4, label: "Node 4", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 5, label: "Node 5", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 6, label: "Node 6", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}},
+                    { id: 7, label: "Node 7", color: color_codes.white , value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}}
                   ],
                   edges: [{ from: 1, to: 2, label:"4" }, { from: 1, to: 3, label:"3" },{ from: 1, to: 5, label:"7" }, { from: 2, to: 3, label:"6" },{ from: 2, to: 4, label:"5" },
                   { from: 3, to: 4, label:"11" }, { from: 3, to: 5, label:"8" },{ from: 4, to: 5, label:"2" }, { from: 5, to: 7, label:"5" }, { from: 4, to: 7, label:"10" }, { from: 4, to: 6, label:"2" }, { from: 6, to: 7, label:"3" } ]
@@ -115,40 +110,86 @@ class Screen extends React.Component{
                     this.handleEvent(nodes, edges);
                 }
             },
-            distance: null,
-            path: null
+            // distance: null,
+            // path: null,
+            // active: null
+            result: {distance: "", path: []},
+            display_id: -2 // -2: inactive, -1: to start the display process
         }
         // console.log(this.state.events);
         this.state.events.select=this.state.events.select.bind(this);
         this.addNode = this.addNode.bind(this);
         this.begin = this.begin.bind(this);
         this.handleEvent = this.handleEvent.bind(this);
+        this.renderGraph = this.renderGraph.bind(this);
+
     }
     handleEvent(nodes, edges){ // handles button selection
-        // var changedNode = this.state.graph.nodes.slice();
-        // // console.log(changedNode);
-        // changedNode[nodes[0] - 1] = {id: nodes[0] , color: "#000000"};
-        // this.setState({graph: {nodes: changedNode, edges: this.state.graph.edges}})
-        // console.log(toAdjacencyList(this.state.graph.nodes, this.state.graph.edges));
-        // var result = dijkstra(toAdjacencyList(this.state.graph.nodes, this.state.graph.edges), 1, 6);
-        // this.setState({distance: result.distance});
-        // this.setState({path: result.path});
     }
     begin(start, end){
         var result = dijkstra(toAdjacencyList(this.state.graph.nodes, this.state.graph.edges), start, end);
-        this.setState({distance: result.distance});
-        this.setState({path: result.path});
+        this.setState({result: result});
+        this.setState({display_id: -1});
+        // this.setState({active: result.visited});
+        // this.setState({distance: result.distance});
+        // this.setState({path: result.path});
+        
+        // var changedEdges = this.state.graph.edges.slice(); // save edges array from state
+
+        // var changedNode = [];
+        // this.state.graph.nodes.map((child) =>{
+        //     changedNode.push(Object.assign({}, child));    
+        // })
+            
+        // while (result.visited != null && result.visited.length > 0 && this.state.update == true){
+        //     this.setState({update: false});
+        //     var id = result.visited.pop();
+        //     var node = changedNode.find((e) => {
+        //         return e.id == id;
+        //     })
+        //     node.color = color_codes.red;
+        // }
+        
+        // this.setState({graph: {nodes: changedNode, edges: changedEdges}}); // change state
+    }
+    componentDidMount(){
+        setInterval(() => {
+            if (this.state.display_id == -2){
+                return;
+            }
+            var changedEdges = this.state.graph.edges.slice(); // save edges array from state
+            var changedNode = [];
+            this.state.graph.nodes.map((child) =>{
+                changedNode.push(Object.assign({}, child));    
+            })
+            
+            // var node = changedNode.find((e) => {
+            //     return e.id == globl_id;
+            // })
+            // if (++globl_id > 4){
+            //     globl_id = 1;
+            // }
+            if (this.state.result.visited.length == 0){
+                this.display_id = -2; // turn off the display
+                return;
+            }
+            var id = this.state.result.visited.shift();
+            var node = changedNode.find((e) => {
+                return e.id == id;
+            })
+            node.color = color_codes.red;
+            this.setState({graph: {nodes: changedNode, edges: changedEdges}}); // change state
+        }, 1000);
     }
     addNode(connectedNodes, weights){
-        console.log("addNode called");
         console.log(weights);
         var changedNode = this.state.graph.nodes.slice(); // save node array from state
         var changedEdges = this.state.graph.edges.slice(); // save edges array from state
         for (var i = 0; i < connectedNodes.length; i++){
-            changedEdges.push({from: connectedNodes[i], to: changedNode[changedNode.length - 1].id + 1, label: weights[i]}) // TODO
+            changedEdges.push({from: connectedNodes[i], to: changedNode[changedNode.length - 1].id + 1, label: weights[i]}) 
         }
         changedNode.push({id: changedNode[changedNode.length - 1].id + 1, label: 'Node ' +
-         (changedNode[changedNode.length - 1].id + 1), color: getRandomColor()}); // modify state for nodes
+         (changedNode[changedNode.length - 1].id + 1), color: color_codes.white, value: 15, scaling:{label: {enabled: true, min: 10, max: 30}}}); // modify state for nodes
         this.setState({graph: {nodes: changedNode, edges: changedEdges}}); // change state
     }
     renderGraph(){
@@ -157,7 +198,7 @@ class Screen extends React.Component{
             graph = {this.state.graph}
             options = {this.state.options}
             events = {this.state.events}
-            style = {{height: "640px"}}
+            style = {{height: "450px"}}
             />
         )
     }
@@ -169,29 +210,23 @@ class Screen extends React.Component{
             nodes = {this.state.graph.nodes}
             edges = {this.state.graph.edges}
             nextNode = {this.state.graph.nodes.length}
-            distance = {this.state.distance}
-            path = {this.state.path}
+            distance = {this.state.result.distance}
+            path = {this.state.result.path}
             />
         )
     }
     render(){
         return(
         <div>
-            <h1>React graph vis</h1>
-            <p>
-            <a href="https://github.com/crubier/react-graph-vis">Github</a> -{" "}
-            <a href="https://www.npmjs.com/package/react-graph-vis">NPM</a>
-            </p>
-            <p>
-            <a href="https://github.com/crubier/react-graph-vis/tree/master/example">Source of this page</a>
-            </p>
-            <p>A React component to display beautiful network graphs using vis.js</p>
-            <p>
-            Make sure to visit <a href="http://visjs.org">visjs.org</a> for more info.
-            </p>
-            <p>This package allows to render network graphs using vis.js.</p>
-            <p>Rendered graphs are scrollable, zoomable, retina ready, dynamic, and switch layout on double click.</p>
-           {this.renderGraph()};
+      <Tabs>
+        <div label="Dijkstra's Shortest Path Algorithm">
+        {this.renderGraph()};
+        </div>
+        <div label="Kruskal Algorithm">
+        </div>
+        <div label="Prim's Algorithm">
+        </div>
+      </Tabs>           
            {this.renderMenu()};
         </div>
         )
