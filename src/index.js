@@ -7,11 +7,11 @@ import React from "react";
 import ReactDOM from 'react-dom';
 import './index.css'
 import Tabs from './tabs.js'
-import {toAdjacencyList, getRandomColor, arr_to_string} from './helper.js'
+import {toAdjacencyList, getRandomColor, arr_to_string, paint_nodes_white} from './helper.js'
 import {dijkstra} from "./dijkstra.js"
-import {color_codes} from "./constants.js"
-
-var globl_id = 1;
+import {color_codes} from "./constants.js";
+import TestTable from "./table";
+import ScrollTable from './scrolltable'
 
 class Menu extends React.Component{
     constructor(props){
@@ -65,7 +65,7 @@ class Menu extends React.Component{
                     <input type="text" onChange={(event) => {this.setState({end: event.target.value})}} />
                 </div>
                 <button
-                onClick={() => this.props.begin(this.state.start, this.state.end)}>
+                onClick={() => this.props.algorithm(this.state.start, this.state.end)}>
                     Go!
                 </button>
             </div>
@@ -110,47 +110,50 @@ class Screen extends React.Component{
                     this.handleEvent(nodes, edges);
                 }
             },
-            // distance: null,
-            // path: null,
-            // active: null
-            result: {distance: "", path: []},
+            result: {distance: "", path: [], distance_hist: [[{nodeId: 1, distance: 1}]]},
             display_id: -2 // -2: inactive, -1: to start the display process
         }
-        // console.log(this.state.events);
         this.state.events.select=this.state.events.select.bind(this);
         this.addNode = this.addNode.bind(this);
-        this.begin = this.begin.bind(this);
-        this.handleEvent = this.handleEvent.bind(this);
+        this.begin_dijkstra = this.begin_dijkstra.bind(this);
         this.renderGraph = this.renderGraph.bind(this);
 
     }
-    handleEvent(nodes, edges){ // handles button selection
+    handleEvent(nodes, edges){
+        // add code here if you want to do something upon selecting a node
     }
-    begin(start, end){
+    begin_dijkstra(start, end){
+        var match1 = false;
+        var match2 = false;
+
+        this.state.graph.nodes.map((elem) =>{
+            if (start == elem.id){
+                match1 = true;
+            }
+            if (end == elem.id){
+                match2 = true;
+            }
+        })
+        if (!(match1 && match2)){
+            return;
+        }
+
         var result = dijkstra(toAdjacencyList(this.state.graph.nodes, this.state.graph.edges), start, end);
         this.setState({result: result});
         this.setState({display_id: -1});
-        // this.setState({active: result.visited});
-        // this.setState({distance: result.distance});
-        // this.setState({path: result.path});
-        
-        // var changedEdges = this.state.graph.edges.slice(); // save edges array from state
+        var changedNode = [];
+        var changedEdges = this.state.graph.edges.slice(); // save edges array from state
 
-        // var changedNode = [];
-        // this.state.graph.nodes.map((child) =>{
-        //     changedNode.push(Object.assign({}, child));    
-        // })
-            
-        // while (result.visited != null && result.visited.length > 0 && this.state.update == true){
-        //     this.setState({update: false});
-        //     var id = result.visited.pop();
-        //     var node = changedNode.find((e) => {
-        //         return e.id == id;
-        //     })
-        //     node.color = color_codes.red;
-        // }
-        
-        // this.setState({graph: {nodes: changedNode, edges: changedEdges}}); // change state
+        this.state.graph.nodes.map((child) =>{
+            changedNode.push(Object.assign({}, child));    
+        })
+
+        changedNode = paint_nodes_white(changedNode); // paint all nodes white
+
+        this.setState({graph: {nodes: changedNode, edges: changedEdges}}); 
+    }
+    begin_kruskal(){
+        console.log("begin kruskal");
     }
     componentDidMount(){
         setInterval(() => {
@@ -162,13 +165,7 @@ class Screen extends React.Component{
             this.state.graph.nodes.map((child) =>{
                 changedNode.push(Object.assign({}, child));    
             })
-            
-            // var node = changedNode.find((e) => {
-            //     return e.id == globl_id;
-            // })
-            // if (++globl_id > 4){
-            //     globl_id = 1;
-            // }
+
             if (this.state.result.visited.length == 0){
                 this.display_id = -2; // turn off the display
                 return;
@@ -202,11 +199,11 @@ class Screen extends React.Component{
             />
         )
     }
-    renderMenu(){
+    renderMenu(algorithm){
         return(
             <Menu
             addNode = {this.addNode}
-            begin = {this.begin}
+            algorithm = {algorithm}
             nodes = {this.state.graph.nodes}
             edges = {this.state.graph.edges}
             nextNode = {this.state.graph.nodes.length}
@@ -218,16 +215,32 @@ class Screen extends React.Component{
     render(){
         return(
         <div>
+
       <Tabs>
         <div label="Dijkstra's Shortest Path Algorithm">
-        {this.renderGraph()};
+            <div className = "table">
+                {/* <TestTable nodes = {this.state.result.distance_hist}/> */}
+                <ScrollTable nodes = {this.state.result.distance_hist}></ScrollTable>
+            </div>
+            <div className = "graph">
+                {this.renderGraph()}
+            </div>
+            <div>
+                {this.renderMenu(this.begin_dijkstra)}
+            </div>
         </div>
         <div label="Kruskal Algorithm">
+            <div className = "graph_center">
+                {this.renderGraph()}
+            </div>
+            <div>
+                {this.renderMenu(this.begin_kruskal)}
+            </div>
         </div>
         <div label="Prim's Algorithm">
         </div>
-      </Tabs>           
-           {this.renderMenu()};
+      </Tabs>
+
         </div>
         )
     }

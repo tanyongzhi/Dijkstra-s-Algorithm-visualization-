@@ -5,6 +5,7 @@ import './index.css'
 import { render } from "react-dom";
 import { connect } from "tls";
 import PriorityQueue from "priorityqueue";
+import { color_codes, constants } from "./constants";
 
 // helper functions 
 export function getRandomColor() { // get random color
@@ -53,6 +54,22 @@ export function arr_to_string(path){
         counter++;
     })
     return ret;
+}
+
+export function paint_nodes_white(nodes){
+    nodes.map((child) => {
+        child.color = color_codes.white;
+    })
+    return nodes;
+}
+
+export function infinite_distance(distance){
+    if (distance >= constants.dijkstra_infinite_dist){
+        return "∞"
+    }
+    else{
+        return distance;
+    }
 }
 
 // public classes

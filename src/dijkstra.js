@@ -1,10 +1,12 @@
 import {  Stack, Point} from "./helper.js";
 import PriorityQueue from "priorityqueue";
+import { constants } from "./constants.js";
 
 
 // para: adjency list, id of start node (int), id of end node (int)
 export function dijkstra(adjList, start, end){
     var dijkstraRet = new DijkstraRet();
+    var distance_hist = [];
     
     // begin init
     const numericCompare = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
@@ -19,10 +21,10 @@ export function dijkstra(adjList, start, end){
     var distances = [];
     var prev = [];
     var visited = []; // keeps track of all the nodes that have been visited
+    
     for (var i = 0; i < adjList.length; i ++){ // distances[] contains the nodeId and current distance seen. contains a nodeId and distance obj
-        distances.push({nodeId: i + 1, distance: 100000}); // TODO: might want to fix this. add tentative distances to all nodes. value of 100000
-        prev.push({nodeId: i + 1, prevNode: null});
-        // is just an arbitrarily large value
+        distances.push({nodeId: i + 1, distance: constants.dijkstra_infinite_dist}); // TODO: might want to fix this. add tentative distances to all nodes. value of 100000
+        prev.push({nodeId: i + 1, prevNode: null});        // is just an arbitrarily large value
     }
     var init = distances.find(function (element){
         return element.nodeId == start;
@@ -32,19 +34,21 @@ export function dijkstra(adjList, start, end){
     pq.push(new Point (current, 0));
     // end init
     
-    while (visit(distances, adjList, visited, pq, end, prev) != 1){;}
-    console.log(distances);
-    console.log(visited);
+    var temp = distances;
+    while (visit(temp, adjList, visited, pq, end, prev) != 1){
+        distance_hist.push(temp);
+    }
     var path = getPath(prev, start, end);
-    console.log(path);
     var finalDist = distances.find(function (element){
         return element.nodeId == end;
     })
     dijkstraRet.distance = finalDist.distance;
     dijkstraRet.path = path;
     dijkstraRet.visited = visited;
+    dijkstraRet.distance_hist = distance_hist;
     return dijkstraRet;
 }
+
 // needed for dijkstra, visit a node and updates distance array
 // note: in js, arrays and objects are always passed by reference to functions
 export function visit(distances, adjList, visited, pq, end, prev){
@@ -110,5 +114,6 @@ export class DijkstraRet{
         this.path = [];
         this.distance = -1;
         this.visited = [];
+        this.distance_hist = [];
     }
 }
