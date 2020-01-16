@@ -21,9 +21,9 @@ Before we begin, please make sure that you have the following installed:
 ### Running the application:
 After cloning the repo, navigate to the project folder. <br/>
 Install dependencies:
-'''
+```
 npm install
-'''
+```
 
 ### Footnote:
 This project is still under development and does not have a fully-functioning release version. THe project will not receive constant updates, and will only be updated sporadically.
