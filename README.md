@@ -23,6 +23,12 @@ After cloning the repo, navigate to the project folder. <br/>
 Install dependencies:
 ```
 npm install
+
+```
+Run application:
+```
+npm start
+
 ```
 
 ### Footnote:
