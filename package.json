@@ -4,11 +4,13 @@
   "private": true,
   "dependencies": {
     "@material-ui/core": "^4.8.3",
+    "disjoint-set": "^1.1.8",
     "priorityqueue": "^1.0.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-graph-vis": "^1.0.5",
-    "react-scripts": "3.2.0"
+    "react-scripts": "3.2.0",
+    "union-find": "^1.0.2"
   },
   "scripts": {
     "start": "react-scripts start",

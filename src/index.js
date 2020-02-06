@@ -12,6 +12,7 @@ import {dijkstra} from "./dijkstra.js"
 import {color_codes} from "./constants.js";
 import TestTable from "./table";
 import ScrollTable from './scrolltable'
+import {kruskal} from './kruskal'
 
 class Menu extends React.Component{
     constructor(props){
@@ -116,7 +117,9 @@ class Screen extends React.Component{
         this.state.events.select=this.state.events.select.bind(this);
         this.addNode = this.addNode.bind(this);
         this.begin_dijkstra = this.begin_dijkstra.bind(this);
+        this.begin_kruskal = this.begin_kruskal.bind(this);
         this.renderGraph = this.renderGraph.bind(this);
+        
 
     }
     handleEvent(nodes, edges){
@@ -153,7 +156,7 @@ class Screen extends React.Component{
         this.setState({graph: {nodes: changedNode, edges: changedEdges}}); 
     }
     begin_kruskal(){
-        console.log("begin kruskal");
+        kruskal(this.state.graph);
     }
     componentDidMount(){
         setInterval(() => {

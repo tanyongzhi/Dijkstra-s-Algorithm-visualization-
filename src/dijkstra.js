@@ -11,7 +11,6 @@ export function dijkstra(adjList, start, end){
     // begin init
     const numericCompare = (a, b) => (a < b ? 1 : a > b ? -1 : 0);
     const comparator = (a, b) => { // comparator sorts strictly according to y
-        // const x = numericCompare(a.x, b.x);
         const y = numericCompare(a.weight, b.weight); // TODO: maybe modify to return lower x if y is tied
         return y;
       };
